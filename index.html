@@ -86,7 +86,6 @@
                 <div id="admin-view" class="mt-8 p-6 bg-blue-50 rounded-xl border border-blue-200">
                     <h3 class="text-2xl font-bold text-blue-700 mb-6 text-center">Painel de Gerenciamento</h3>
                     
-                    <!-- Seção de Solicitações Pendentes -->
                     <div class="mb-8">
                         <h4 class="text-xl font-semibold text-gray-800 mb-3 border-b pb-2">Solicitações Pendentes</h4>
                         <div id="pending-appointments">
@@ -94,7 +93,6 @@
                         </div>
                     </div>
 
-                    <!-- Seção da Agenda de Consultas -->
                     <div>
                         <h4 class="text-xl font-semibold text-gray-800 mb-3 border-b pb-2">Sua Agenda de Consultas</h4>
                         <div id="confirmed-appointments">
@@ -117,8 +115,8 @@
                     <input type="text" id="patient-name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" required>
                 </div>
                 <div class="mb-6">
-                    <label for="patient-contact" class="block text-sm font-medium text-gray-700 mb-1">Seu WhatsApp ou Telefone</label>
-                    <input type="tel" id="patient-contact" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" required>
+                    <label for="patient-contact" class="block text-sm font-medium text-gray-700 mb-1">Seu WhatsApp ou Telefone (com DDD)</label>
+                    <input type="tel" id="patient-contact" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Ex: 11999998888" required>
                 </div>
                 <div class="flex justify-end gap-3">
                     <button type="button" id="cancel-booking" class="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">Cancelar</button>
@@ -250,6 +248,13 @@
         function renderSlots() {
             loadingDiv.style.display = 'none';
             slotsContainer.innerHTML = '';
+            const dayOfWeek = currentDate.getDay();
+
+            if (dayOfWeek === 0 || dayOfWeek === 6) { // Domingo ou Sábado
+                slotsContainer.innerHTML = '<p class="col-span-full text-center text-gray-500 py-4">Não há atendimento aos finais de semana.</p>';
+                return;
+            }
+
             const allSlots = generateTimeSlots();
             const dateStr = getFormattedDateString(currentDate);
 
@@ -283,7 +288,7 @@
                 return;
             }
             
-            const pending = appointments.filter(a => a.status === 'pending');
+            const pending = appointments.filter(a => a.status === 'pending').sort((a,b) => new Date(a.createdAt) - new Date(b.createdAt));
             pendingAppointmentsDiv.innerHTML = '';
             
             if (pending.length === 0) {
@@ -336,23 +341,52 @@
             confirmed.forEach(appt => {
                 const apptDate = new Date(appt.date + 'T00:00:00');
                 const formattedDate = apptDate.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: 'long' });
+                const contactNumber = (appt.patientContact || '').replace(/\D/g, '');
+                const whatsappLink = contactNumber ? `https://wa.me/55${contactNumber}` : '#';
+
                 const card = document.createElement('div');
-                card.className = 'bg-white p-4 rounded-lg shadow mb-3';
+                card.className = 'bg-white p-4 rounded-lg shadow mb-3 flex justify-between items-center';
                 card.innerHTML = `
-                    <p class="font-bold text-lg text-green-700">${formattedDate} - ${appt.time}</p>
-                    <p class="text-gray-800">${appt.patientName}</p>
-                    <p class="text-gray-600">Contato: ${appt.patientContact}</p>`;
+                    <div>
+                        <p class="font-bold text-lg text-green-700">${formattedDate} - ${appt.time}</p>
+                        <p class="text-gray-800">${appt.patientName}</p>
+                        <p class="text-gray-600">Contato: ${appt.patientContact}</p>
+                    </div>
+                    <a href="${whatsappLink}" target="_blank" class="bg-green-500 text-white p-3 rounded-full hover:bg-green-600 transition-colors flex-shrink-0">
+                        <i class="fab fa-whatsapp fa-lg"></i>
+                    </a>`;
                 confirmedAppointmentsDiv.appendChild(card);
             });
         }
 
         function updateDateDisplay() {
+            let dayOfWeek = currentDate.getDay();
+            if (dayOfWeek === 0) { // Se for domingo, pula para segunda
+                currentDate.setDate(currentDate.getDate() + 1);
+            } else if (dayOfWeek === 6) { // Se for sábado, pula para segunda
+                currentDate.setDate(currentDate.getDate() + 2);
+            }
             currentDateElem.textContent = formatDate(currentDate);
             listenToAppointments();
         }
 
         function changeDay(offset) {
             currentDate.setDate(currentDate.getDate() + offset);
+            let dayOfWeek = currentDate.getDay();
+
+            if (offset > 0) { // Indo para frente
+                if (dayOfWeek === 6) { // Caiu no Sábado, pule para Segunda
+                    currentDate.setDate(currentDate.getDate() + 2);
+                } else if (dayOfWeek === 0) { // Caiu no Domingo, pule para Segunda
+                    currentDate.setDate(currentDate.getDate() + 1);
+                }
+            } else { // Indo para trás
+                if (dayOfWeek === 0) { // Caiu no Domingo, pule para Sexta
+                    currentDate.setDate(currentDate.getDate() - 2);
+                } else if (dayOfWeek === 6) { // Caiu no Sábado, pule para Sexta
+                    currentDate.setDate(currentDate.getDate() - 1);
+                }
+            }
             updateDateDisplay();
         }
         
