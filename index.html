@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dr(a). [Seu Nome] - Cartão de Visita Virtual</title>
+    <title>L M Odontologia - Agende sua Consulta</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -21,8 +21,12 @@
         .modal-backdrop, .login-backdrop {
             transition: opacity 0.3s ease;
         }
-        /* Esconde elementos por padrão */
-        #admin-view, #logout-button {
+        .dentist-btn.selected {
+            background-color: #2563eb; /* bg-blue-600 */
+            color: white;
+            box-shadow: 0 4px 14px 0 rgb(0 118 255 / 39%);
+        }
+        #admin-view, #logout-button, #agenda-section {
             display: none;
         }
     </style>
@@ -39,35 +43,68 @@
 
             <!-- Seção do Cabeçalho -->
             <header class="text-center pb-8 border-b border-gray-200">
-                <img src="https://placehold.co/128x128/007BFF/FFFFFF?text=Sua+Foto" 
-                     alt="Foto do Dentista" 
+                <img src="https://placehold.co/128x128/007BFF/FFFFFF?text=LM" 
+                     alt="Logo L M Odontologia" 
                      class="w-32 h-32 rounded-full mx-auto mb-4 shadow-md border-4 border-white">
-                <h1 class="text-4xl font-bold text-blue-600">Dr(a). [Seu Nome Completo]</h1>
-                <p class="text-xl text-gray-500 mt-2">[Sua Especialidade, e.g., Ortodontia e Clínica Geral]</p>
-                <p class="text-md text-gray-500 mt-1">CRO-[UF] [Seu Número]</p>
+                <h1 class="text-4xl font-bold text-blue-600">L M Odontologia</h1>
+                <p class="text-lg text-gray-500 mt-2">Av. Direitos Humanos, 2687 - Imirim, São Paulo - SP</p>
             </header>
 
             <!-- Seção de Contato Rápido -->
-            <section class="grid grid-cols-1 md:grid-cols-3 gap-4 py-8 text-center">
-                <a href="tel:[SEU_TELEFONE]" class="bg-blue-50 hover:bg-blue-100 p-4 rounded-lg transition-colors">
+            <section class="grid grid-cols-1 md:grid-cols-2 gap-4 py-8 text-center">
+                <a href="tel:11992610052" class="bg-blue-50 hover:bg-blue-100 p-4 rounded-lg transition-colors">
                     <i class="fas fa-phone fa-2x text-blue-500"></i>
-                    <p class="mt-2 font-semibold">[Seu Telefone]</p>
+                    <p class="mt-2 font-semibold">Telefone</p>
                 </a>
-                <a href="https://wa.me/[SEU_NUMERO_WHATSAPP]" target="_blank" class="bg-green-50 hover:bg-green-100 p-4 rounded-lg transition-colors">
+                <a href="https://wa.me/5511992610052" target="_blank" class="bg-green-50 hover:bg-green-100 p-4 rounded-lg transition-colors">
                     <i class="fab fa-whatsapp fa-2x text-green-500"></i>
-                    <p class="mt-2 font-semibold">WhatsApp</p>
-                </a>
-                <a href="mailto:[SEU_EMAIL]" class="bg-gray-100 hover:bg-gray-200 p-4 rounded-lg transition-colors">
-                    <i class="fas fa-envelope fa-2x text-gray-500"></i>
-                    <p class="mt-2 font-semibold">[Seu Email]</p>
+                    <p class="mt-2 font-semibold">WhatsApp Geral</p>
                 </a>
             </section>
 
-            <!-- Seção de Agendamento -->
-            <section id="agendamento" class="pt-8">
-                <h2 class="text-3xl font-bold text-center mb-2">Agende sua Consulta</h2>
-                <p class="text-center text-gray-500 mb-8">Clique em um horário disponível para solicitar seu agendamento.</p>
+            <!-- Seção Nossos Especialistas -->
+            <section class="pt-8 border-t border-gray-200">
+                <h2 class="text-3xl font-bold text-center mb-8">Nossos Especialistas</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Perfil Dr. Marcelo -->
+                    <div class="text-center p-6 bg-gray-100 rounded-xl">
+                        <img src="https://placehold.co/128x128/334155/FFFFFF?text=Dr.+Marcelo" alt="Foto Dr. Marcelo" class="w-24 h-24 rounded-full mx-auto mb-4">
+                        <h3 class="text-2xl font-bold text-gray-800">Dr. Marcelo Rafael Viola</h3>
+                        <p class="text-md text-blue-600 font-semibold">Clínica Geral e Implantodontia</p>
+                        <p class="text-sm text-gray-500 mt-1">CROSP 54942</p>
+                        <a href="https://wa.me/5511992610052" target="_blank" class="mt-4 inline-block bg-green-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-600 transition-colors">
+                            <i class="fab fa-whatsapp mr-2"></i>Contato Dr. Marcelo
+                        </a>
+                    </div>
+                    <!-- Perfil Dra. Luciana -->
+                    <div class="text-center p-6 bg-gray-100 rounded-xl">
+                        <img src="https://placehold.co/128x128/831843/FFFFFF?text=Dra.+Luciana" alt="Foto Dra. Luciana" class="w-24 h-24 rounded-full mx-auto mb-4">
+                        <h3 class="text-2xl font-bold text-gray-800">Dra. Luciana M. R. Viola</h3>
+                        <p class="text-md text-pink-600 font-semibold">Clínica Geral e Ortodontia</p>
+                        <p class="text-sm text-gray-500 mt-1">CROSP 57762</p>
+                         <a href="https://wa.me/5511989634356" target="_blank" class="mt-4 inline-block bg-green-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-600 transition-colors">
+                            <i class="fab fa-whatsapp mr-2"></i>Contato Dra. Luciana
+                        </a>
+                    </div>
+                </div>
+            </section>
 
+            <!-- Seção de Seleção de Agenda -->
+            <section class="pt-10 mt-8 border-t border-gray-200">
+                 <h2 class="text-3xl font-bold text-center mb-2">Agende sua Consulta</h2>
+                 <p class="text-center text-gray-500 mb-8">Primeiro, selecione com qual profissional você deseja agendar.</p>
+                 <div class="flex justify-center gap-4 mb-8">
+                    <button id="select-marcelo" data-dentist="marcelo" class="dentist-btn text-lg font-semibold py-3 px-6 bg-white border-2 border-blue-500 text-blue-500 rounded-lg transition-all duration-300">
+                        Agenda Dr. Marcelo
+                    </button>
+                    <button id="select-luciana" data-dentist="luciana" class="dentist-btn text-lg font-semibold py-3 px-6 bg-white border-2 border-pink-500 text-pink-500 rounded-lg transition-all duration-300">
+                        Agenda Dra. Luciana
+                    </button>
+                 </div>
+            </section>
+            
+            <!-- Seção da Agenda (escondida inicialmente) -->
+            <section id="agenda-section" class="pt-8">
                 <div class="bg-gray-100 p-4 sm:p-6 rounded-xl">
                     <div class="flex items-center justify-between mb-6">
                         <button id="prev-day" class="p-2 rounded-full hover:bg-gray-200 transition-colors"><i class="fas fa-chevron-left"></i></button>
@@ -81,30 +118,24 @@
                     </div>
                     <div id="slots-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"></div>
                 </div>
-                 
-                 <!-- PAINEL DO DENTISTA - ATUALIZADO -->
-                <div id="admin-view" class="mt-8 p-6 bg-blue-50 rounded-xl border border-blue-200">
-                    <h3 class="text-2xl font-bold text-blue-700 mb-6 text-center">Painel de Gerenciamento</h3>
-                    
-                    <div class="mb-8">
-                        <h4 class="text-xl font-semibold text-gray-800 mb-3 border-b pb-2">Solicitações Pendentes</h4>
-                        <div id="pending-appointments">
-                            <p class="text-gray-600 p-3 text-center">Nenhuma solicitação pendente.</p>
-                        </div>
-                    </div>
-
-                    <div>
-                        <h4 class="text-xl font-semibold text-gray-800 mb-3 border-b pb-2">Sua Agenda de Consultas</h4>
-                        <div id="confirmed-appointments">
-                             <p class="text-gray-600 p-3 text-center">Nenhuma consulta na agenda.</p>
-                        </div>
-                    </div>
-                </div>
             </section>
+                 
+            <!-- PAINEL DO DENTISTA -->
+            <div id="admin-view" class="mt-8 p-6 bg-blue-50 rounded-xl border border-blue-200">
+                <h3 class="text-2xl font-bold text-blue-700 mb-6 text-center">Painel de Gerenciamento</h3>
+                <div class="mb-8">
+                    <h4 class="text-xl font-semibold text-gray-800 mb-3 border-b pb-2">Solicitações Pendentes</h4>
+                    <div id="pending-appointments"><p class="text-gray-600 p-3 text-center">Selecione uma agenda para ver as solicitações.</p></div>
+                </div>
+                <div>
+                    <h4 class="text-xl font-semibold text-gray-800 mb-3 border-b pb-2">Agenda de Consultas</h4>
+                    <div id="confirmed-appointments"><p class="text-gray-600 p-3 text-center">Selecione uma agenda para ver as consultas.</p></div>
+                </div>
+            </div>
         </main>
     </div>
 
-    <!-- Modal de Agendamento (Paciente) -->
+    <!-- Modals (Agendamento e Login) -->
     <div id="booking-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden modal-backdrop">
         <div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
             <h3 class="text-2xl font-bold mb-2">Solicitar Agendamento</h3>
@@ -128,29 +159,25 @@
             </form>
         </div>
     </div>
-    
-    <!-- Modal de Login (Dentista) -->
     <div id="login-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 hidden login-backdrop">
         <div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-sm">
             <h3 class="text-2xl font-bold mb-4 text-center">Acesso Restrito</h3>
             <form id="login-form">
                 <div class="mb-4">
                     <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                    <input type="email" id="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" required>
+                    <input type="email" id="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg" required>
                 </div>
                 <div class="mb-6">
                     <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Senha</label>
-                    <input type="password" id="password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" required>
+                    <input type="password" id="password" class="w-full px-4 py-2 border border-gray-300 rounded-lg" required>
                 </div>
                 <p id="login-error" class="text-red-500 text-sm text-center mb-4 hidden"></p>
-                <button type="submit" id="login-button" class="w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors">Entrar</button>
+                <button type="submit" id="login-button" class="w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg">Entrar</button>
             </form>
         </div>
     </div>
+    <div id="success-message" class="fixed top-5 right-5 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg hidden animate-pulse">Solicitação enviada!</div>
 
-    <div id="success-message" class="fixed top-5 right-5 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg hidden animate-pulse">
-        Solicitação enviada com sucesso!
-    </div>
 
     <!-- Firebase SDKs -->
     <script type="module">
@@ -175,95 +202,102 @@
         const workingHours = { start: 9, end: 18, lunchStart: 12, lunchEnd: 14 };
         const slotDuration = 60;
 
-        const slotsContainer = document.getElementById('slots-container');
-        const currentDateElem = document.getElementById('current-date');
-        const prevDayBtn = document.getElementById('prev-day');
-        const nextDayBtn = document.getElementById('next-day');
-        const loadingDiv = document.getElementById('loading');
-        const successMessage = document.getElementById('success-message');
-        const bookingModal = document.getElementById('booking-modal');
-        const cancelBookingBtn = document.getElementById('cancel-booking');
-        const bookingForm = document.getElementById('booking-form');
-        const adminView = document.getElementById('admin-view');
-        const pendingAppointmentsDiv = document.getElementById('pending-appointments');
-        const confirmedAppointmentsDiv = document.getElementById('confirmed-appointments');
-        const loginModal = document.getElementById('login-modal');
-        const loginForm = document.getElementById('login-form');
-        const loginError = document.getElementById('login-error');
-        const logoutButton = document.getElementById('logout-button');
+        const ui = {
+            agendaSection: document.getElementById('agenda-section'),
+            slotsContainer: document.getElementById('slots-container'),
+            currentDateElem: document.getElementById('current-date'),
+            prevDayBtn: document.getElementById('prev-day'),
+            nextDayBtn: document.getElementById('next-day'),
+            loadingDiv: document.getElementById('loading'),
+            successMessage: document.getElementById('success-message'),
+            bookingModal: document.getElementById('booking-modal'),
+            cancelBookingBtn: document.getElementById('cancel-booking'),
+            bookingForm: document.getElementById('booking-form'),
+            adminView: document.getElementById('admin-view'),
+            pendingAppointmentsDiv: document.getElementById('pending-appointments'),
+            confirmedAppointmentsDiv: document.getElementById('confirmed-appointments'),
+            loginModal: document.getElementById('login-modal'),
+            loginForm: document.getElementById('login-form'),
+            loginError: document.getElementById('login-error'),
+            logoutButton: document.getElementById('logout-button'),
+            dentistButtons: document.querySelectorAll('.dentist-btn')
+        };
 
         let currentDate = new Date();
         currentDate.setHours(0, 0, 0, 0);
         let appointments = [];
         let selectedSlot = null;
+        let selectedDentist = null;
+        let unsubscribe = null; // To stop listening to previous dentist's appointments
 
+        // --- AUTH LOGIC ---
         onAuthStateChanged(auth, (user) => {
             const isLoggedIn = !!user;
-            adminView.style.display = isLoggedIn ? 'block' : 'none';
-            logoutButton.style.display = isLoggedIn ? 'block' : 'none';
-            if (isLoggedIn) {
-                loginModal.classList.add('hidden');
-            }
+            ui.adminView.style.display = isLoggedIn ? 'block' : 'none';
+            ui.logoutButton.style.display = isLoggedIn ? 'block' : 'none';
+            if (isLoggedIn) ui.loginModal.classList.add('hidden');
             renderAdminPanels();
         });
 
-        if (window.location.search.includes('login=true')) {
-            loginModal.classList.remove('hidden');
-        }
-
-        loginForm.addEventListener('submit', async (e) => {
+        if (window.location.search.includes('login=true')) ui.loginModal.classList.remove('hidden');
+        ui.loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            loginError.classList.add('hidden');
+            ui.loginError.classList.add('hidden');
             try {
                 await signInWithEmailAndPassword(auth, email, password);
             } catch (error) {
-                loginError.textContent = "Email ou senha incorretos.";
-                loginError.classList.remove('hidden');
+                ui.loginError.textContent = "Email ou senha incorretos.";
+                ui.loginError.classList.remove('hidden');
             }
         });
+        ui.logoutButton.addEventListener('click', () => signOut(auth));
 
-        logoutButton.addEventListener('click', () => signOut(auth));
+        // --- DENTIST SELECTION ---
+        ui.dentistButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                selectedDentist = button.dataset.dentist;
+                ui.agendaSection.style.display = 'block';
+                ui.dentistButtons.forEach(btn => btn.classList.remove('selected'));
+                button.classList.add('selected');
+                updateDateDisplay();
+            });
+        });
 
+        // --- DATE & TIME LOGIC ---
         function formatDate(date) {
             return date.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' });
         }
-        
         function getFormattedDateString(date) {
             return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
         }
-
         function generateTimeSlots() {
             const slots = [];
-            for (let hour = workingHours.start; hour < workingHours.end; hour++) {
-                if (hour >= workingHours.lunchStart && hour < workingHours.lunchEnd) continue;
-                for (let minute = 0; minute < 60; minute += slotDuration) {
-                    slots.push(`${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`);
-                }
+            for (let h = workingHours.start; h < workingHours.end; h++) {
+                if (h >= workingHours.lunchStart && h < workingHours.lunchEnd) continue;
+                slots.push(`${String(h).padStart(2, '0')}:00`);
             }
             return slots;
         }
-
+        
+        // --- RENDERING LOGIC ---
         function renderSlots() {
-            loadingDiv.style.display = 'none';
-            slotsContainer.innerHTML = '';
+            ui.loadingDiv.style.display = 'none';
+            ui.slotsContainer.innerHTML = '';
             const dayOfWeek = currentDate.getDay();
 
-            if (dayOfWeek === 0 || dayOfWeek === 6) { // Domingo ou Sábado
-                slotsContainer.innerHTML = '<p class="col-span-full text-center text-gray-500 py-4">Não há atendimento aos finais de semana.</p>';
+            if (dayOfWeek === 0 || dayOfWeek === 6) {
+                ui.slotsContainer.innerHTML = '<p class="col-span-full text-center text-gray-500 py-4">Não há atendimento aos finais de semana.</p>';
                 return;
             }
 
             const allSlots = generateTimeSlots();
             const dateStr = getFormattedDateString(currentDate);
-
-            const availableSlots = allSlots.filter(time => {
-                return !appointments.some(a => a.date === dateStr && a.time === time);
-            });
+            const availableSlots = allSlots.filter(time => !appointments.some(a => a.date === dateStr && a.time === time));
 
             if (availableSlots.length === 0) {
-                 slotsContainer.innerHTML = '<p class="col-span-full text-center text-gray-500 py-4">Nenhum horário disponível para este dia.</p>';
+                 ui.slotsContainer.innerHTML = '<p class="col-span-full text-center text-gray-500 py-4">Nenhum horário disponível para este dia.</p>';
                  return;
             }
 
@@ -272,11 +306,12 @@
                 slotDiv.className = `p-4 rounded-lg text-center font-semibold text-lg shadow slot bg-blue-500 text-white cursor-pointer slot-available`;
                 slotDiv.textContent = time;
                 slotDiv.onclick = () => openBookingModal(dateStr, time);
-                slotsContainer.appendChild(slotDiv);
+                ui.slotsContainer.appendChild(slotDiv);
             });
         }
         
         function renderAdminPanels() {
+            if (!selectedDentist) return;
             renderPendingAppointments();
             renderConfirmedAppointments();
         }
@@ -284,117 +319,103 @@
         function renderPendingAppointments() {
             const userIsLoggedIn = !!auth.currentUser;
             if (!userIsLoggedIn) {
-                pendingAppointmentsDiv.innerHTML = '';
+                ui.pendingAppointmentsDiv.innerHTML = '';
                 return;
             }
             
             const pending = appointments.filter(a => a.status === 'pending').sort((a,b) => new Date(a.createdAt) - new Date(b.createdAt));
-            pendingAppointmentsDiv.innerHTML = '';
+            ui.pendingAppointmentsDiv.innerHTML = (pending.length === 0) 
+                ? '<p class="text-gray-600 p-3 text-center">Nenhuma solicitação pendente.</p>'
+                : '';
             
-            if (pending.length === 0) {
-                pendingAppointmentsDiv.innerHTML = '<p class="text-gray-600 p-3 text-center">Nenhuma solicitação pendente.</p>';
-                return;
-            }
-
             pending.forEach(appt => {
-                const apptDate = new Date(appt.date + 'T00:00:00');
-                const formattedDate = apptDate.toLocaleDateString('pt-BR', {day: '2-digit', month: 'long'});
-                const card = document.createElement('div');
-                card.className = 'bg-white p-4 rounded-lg shadow mb-3';
-                card.innerHTML = `
-                    <p class="font-bold text-lg">${appt.patientName}</p>
-                    <p class="text-gray-700">Contato: ${appt.patientContact}</p>
-                    <p class="text-gray-500">${formattedDate} às ${appt.time}</p>
-                    <div class="mt-3 flex gap-2">
-                        <button data-id="${appt.id}" class="confirm-btn flex-1 bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">Confirmar</button>
-                        <button data-id="${appt.id}" class="delete-btn flex-1 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">Recusar</button>
-                    </div>`;
-                pendingAppointmentsDiv.appendChild(card);
+                const card = createAdminCard(appt, true);
+                ui.pendingAppointmentsDiv.appendChild(card);
             });
             
-            document.querySelectorAll('.confirm-btn').forEach(btn => {
-                btn.onclick = async (e) => updateDoc(doc(db, "appointments", e.target.dataset.id), { status: 'confirmed' });
-            });
-            document.querySelectorAll('.delete-btn').forEach(btn => {
-                btn.onclick = async (e) => deleteDoc(doc(db, "appointments", e.target.dataset.id));
-            });
+            addAdminButtonListeners();
         }
 
         function renderConfirmedAppointments() {
             const userIsLoggedIn = !!auth.currentUser;
             if (!userIsLoggedIn) {
-                confirmedAppointmentsDiv.innerHTML = '';
+                ui.confirmedAppointmentsDiv.innerHTML = '';
                 return;
             }
 
-            const confirmed = appointments
-                .filter(a => a.status === 'confirmed')
-                .sort((a, b) => new Date(`${a.date}T${a.time}`) - new Date(`${b.date}T${b.time}`));
-
-            confirmedAppointmentsDiv.innerHTML = '';
-
-            if (confirmed.length === 0) {
-                confirmedAppointmentsDiv.innerHTML = '<p class="text-gray-600 p-3 text-center">Nenhuma consulta na agenda.</p>';
-                return;
-            }
+            const confirmed = appointments.filter(a => a.status === 'confirmed').sort((a, b) => new Date(`${a.date}T${a.time}`) - new Date(`${b.date}T${b.time}`));
+            ui.confirmedAppointmentsDiv.innerHTML = (confirmed.length === 0)
+                ? '<p class="text-gray-600 p-3 text-center">Nenhuma consulta na agenda.</p>'
+                : '';
 
             confirmed.forEach(appt => {
-                const apptDate = new Date(appt.date + 'T00:00:00');
-                const formattedDate = apptDate.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: 'long' });
-                const contactNumber = (appt.patientContact || '').replace(/\D/g, '');
-                const whatsappLink = contactNumber ? `https://wa.me/55${contactNumber}` : '#';
+                const card = createAdminCard(appt, false);
+                ui.confirmedAppointmentsDiv.appendChild(card);
+            });
+        }
+        
+        function createAdminCard(appt, isPending) {
+            const apptDate = new Date(appt.date + 'T00:00:00');
+            const formattedDate = apptDate.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: 'long' });
+            const contactNumber = (appt.patientContact || '').replace(/\D/g, '');
+            const whatsappLink = contactNumber ? `https://wa.me/55${contactNumber}` : '#';
+            const card = document.createElement('div');
+            card.className = 'bg-white p-4 rounded-lg shadow mb-3 flex justify-between items-center';
 
-                const card = document.createElement('div');
-                card.className = 'bg-white p-4 rounded-lg shadow mb-3 flex justify-between items-center';
-                card.innerHTML = `
-                    <div>
-                        <p class="font-bold text-lg text-green-700">${formattedDate} - ${appt.time}</p>
-                        <p class="text-gray-800">${appt.patientName}</p>
-                        <p class="text-gray-600">Contato: ${appt.patientContact}</p>
-                    </div>
-                    <a href="${whatsappLink}" target="_blank" class="bg-green-500 text-white p-3 rounded-full hover:bg-green-600 transition-colors flex-shrink-0">
-                        <i class="fab fa-whatsapp fa-lg"></i>
-                    </a>`;
-                confirmedAppointmentsDiv.appendChild(card);
+            let content = `
+                <div>
+                    <p class="font-bold text-lg ${isPending ? 'text-gray-800' : 'text-green-700'}">${isPending ? appt.patientName : `${formattedDate} - ${appt.time}`}</p>
+                    ${isPending ? `<p class="text-gray-700">Contato: ${appt.patientContact}</p><p class="text-gray-500">${formattedDate} às ${appt.time}</p>` : `<p class="text-gray-800">${appt.patientName}</p><p class="text-gray-600">Contato: ${appt.patientContact}</p>`}
+                </div>`;
+
+            if (isPending) {
+                content += `
+                    <div class="flex flex-col gap-2">
+                        <button data-id="${appt.id}" class="confirm-btn bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">Confirmar</button>
+                        <button data-id="${appt.id}" class="delete-btn bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">Recusar</button>
+                    </div>`;
+            } else {
+                content += `<a href="${whatsappLink}" target="_blank" class="bg-green-500 text-white p-3 rounded-full hover:bg-green-600 transition-colors flex-shrink-0"><i class="fab fa-whatsapp fa-lg"></i></a>`;
+            }
+            card.innerHTML = content;
+            return card;
+        }
+
+        function addAdminButtonListeners() {
+            document.querySelectorAll('.confirm-btn').forEach(btn => {
+                btn.onclick = async (e) => updateDoc(doc(db, `appointments_${selectedDentist}`, e.target.dataset.id), { status: 'confirmed' });
+            });
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.onclick = async (e) => deleteDoc(doc(db, `appointments_${selectedDentist}`, e.target.dataset.id));
             });
         }
 
+
+        // --- DATA & STATE MANAGEMENT ---
         function updateDateDisplay() {
             let dayOfWeek = currentDate.getDay();
-            if (dayOfWeek === 0) { // Se for domingo, pula para segunda
-                currentDate.setDate(currentDate.getDate() + 1);
-            } else if (dayOfWeek === 6) { // Se for sábado, pula para segunda
-                currentDate.setDate(currentDate.getDate() + 2);
-            }
-            currentDateElem.textContent = formatDate(currentDate);
+            if (dayOfWeek === 0) currentDate.setDate(currentDate.getDate() + 1);
+            else if (dayOfWeek === 6) currentDate.setDate(currentDate.getDate() + 2);
+            ui.currentDateElem.textContent = formatDate(currentDate);
             listenToAppointments();
         }
 
         function changeDay(offset) {
             currentDate.setDate(currentDate.getDate() + offset);
             let dayOfWeek = currentDate.getDay();
-
-            if (offset > 0) { // Indo para frente
-                if (dayOfWeek === 6) { // Caiu no Sábado, pule para Segunda
-                    currentDate.setDate(currentDate.getDate() + 2);
-                } else if (dayOfWeek === 0) { // Caiu no Domingo, pule para Segunda
-                    currentDate.setDate(currentDate.getDate() + 1);
-                }
-            } else { // Indo para trás
-                if (dayOfWeek === 0) { // Caiu no Domingo, pule para Sexta
-                    currentDate.setDate(currentDate.getDate() - 2);
-                } else if (dayOfWeek === 6) { // Caiu no Sábado, pule para Sexta
-                    currentDate.setDate(currentDate.getDate() - 1);
-                }
-            }
-            updateDateDisplay();
+            if (offset > 0 && (dayOfWeek === 6 || dayOfWeek === 0)) changeDay(1);
+            else if (offset < 0 && (dayOfWeek === 0 || dayOfWeek === 6)) changeDay(-1);
+            else updateDateDisplay();
         }
         
         function listenToAppointments() {
-            loadingDiv.style.display = 'block';
-            slotsContainer.innerHTML = '';
+            if (!selectedDentist) return;
+            if (unsubscribe) unsubscribe(); // Stop listening to the old collection
+            ui.loadingDiv.style.display = 'block';
+            ui.slotsContainer.innerHTML = '';
             
-            onSnapshot(query(collection(db, "appointments")), (snapshot) => {
+            const q = query(collection(db, `appointments_${selectedDentist}`));
+            unsubscribe = onSnapshot(q, (snapshot) => {
                 appointments = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 renderSlots();
                 renderAdminPanels();
@@ -405,27 +426,22 @@
             selectedSlot = { date, time };
             document.getElementById('modal-date').textContent = new Date(date + 'T00:00:00').toLocaleDateString('pt-BR', {day: '2-digit', month: 'long'});
             document.getElementById('modal-time').textContent = time;
-            bookingModal.classList.remove('hidden');
+            ui.bookingModal.classList.remove('hidden');
         }
 
         function closeBookingModal() {
-            bookingModal.classList.add('hidden');
-            bookingForm.reset();
+            ui.bookingModal.classList.add('hidden');
+            ui.bookingForm.reset();
             selectedSlot = null;
         }
 
         async function handleFormSubmit(e) {
             e.preventDefault();
             const submitBtn = document.getElementById('submit-booking');
-            const submitText = document.getElementById('submit-text');
-            const submitSpinner = document.getElementById('submit-spinner');
-
             submitBtn.disabled = true;
-            submitText.textContent = 'Enviando...';
-            submitSpinner.classList.remove('hidden');
 
             try {
-                await addDoc(collection(db, "appointments"), {
+                await addDoc(collection(db, `appointments_${selectedDentist}`), {
                     date: selectedSlot.date,
                     time: selectedSlot.time,
                     patientName: document.getElementById('patient-name').value,
@@ -434,26 +450,22 @@
                     createdAt: new Date()
                 });
                 closeBookingModal();
-                successMessage.classList.remove('hidden');
-                setTimeout(() => { successMessage.classList.add('hidden'); }, 3000);
+                ui.successMessage.classList.remove('hidden');
+                setTimeout(() => { ui.successMessage.classList.add('hidden'); }, 3000);
             } catch (error) {
-                console.error("Erro ao adicionar agendamento: ", error);
+                console.error("Erro ao agendar: ", error);
             } finally {
                 submitBtn.disabled = false;
-                submitText.textContent = 'Confirmar';
-                submitSpinner.classList.add('hidden');
             }
         }
 
-        prevDayBtn.addEventListener('click', () => changeDay(-1));
-        nextDayBtn.addEventListener('click', () => changeDay(1));
-        cancelBookingBtn.addEventListener('click', closeBookingModal);
-        bookingModal.addEventListener('click', (e) => {
-            if (e.target === bookingModal) closeBookingModal();
-        });
-        bookingForm.addEventListener('submit', handleFormSubmit);
+        // --- INITIAL EVENT LISTENERS ---
+        ui.prevDayBtn.addEventListener('click', () => changeDay(-1));
+        ui.nextDayBtn.addEventListener('click', () => changeDay(1));
+        ui.cancelBookingBtn.addEventListener('click', closeBookingModal);
+        ui.bookingModal.addEventListener('click', (e) => { if (e.target === ui.bookingModal) closeBookingModal(); });
+        ui.bookingForm.addEventListener('submit', handleFormSubmit);
 
-        updateDateDisplay();
     </script>
 </body>
 </html>
