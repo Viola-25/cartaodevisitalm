@@ -234,25 +234,26 @@
         let allAppointments = { marcelo: [], luciana: [] };
         let selectedDentist = null;
         let appointmentToDeleteId = null;
-        let unsubscribe = { marcelo: null, luciana: null };
+        let adminListeners = { marcelo: null, luciana: null };
+        let currentListenerUnsubscribe = null;
 
         function setupAdminListeners() {
             const dentists = ['marcelo', 'luciana'];
             dentists.forEach(dentist => {
                 const q = query(collection(db, `appointments_${dentist}`));
-                unsubscribe[dentist] = onSnapshot(q, (snapshot) => {
+                adminListeners[dentist] = onSnapshot(q, (snapshot) => {
                     allAppointments[dentist] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     updateNotificationDots();
                     if (selectedDentist === dentist) {
-                        renderSelectedDentistAgenda();
+                        renderAdminPanels(allAppointments[dentist]);
                     }
                 });
             });
         }
 
         function teardownAdminListeners() {
-            if (unsubscribe.marcelo) unsubscribe.marcelo();
-            if (unsubscribe.luciana) unsubscribe.luciana();
+            if (adminListeners.marcelo) adminListeners.marcelo();
+            if (adminListeners.luciana) adminListeners.luciana();
             updateNotificationDots(true); // Clear dots
         }
 
@@ -261,7 +262,7 @@
              dentists.forEach(dentist => {
                 const button = document.getElementById(`select-${dentist}`);
                 const dot = button.querySelector('.notification-dot');
-                const hasPending = !clear && allAppointments[dentist].some(a => a.status === 'pending');
+                const hasPending = !clear && allAppointments[dentist] && allAppointments[dentist].some(a => a.status === 'pending');
                 dot.style.display = hasPending ? 'block' : 'none';
              });
         }
@@ -299,7 +300,7 @@
                 ui.dentistButtons.forEach(btn => btn.classList.remove('selected'));
                 button.classList.add('selected');
                 updateDateDisplay();
-                renderSelectedDentistAgenda(); // BUG FIX: Render everything on selection
+                listenAndRenderAgenda();
             });
         });
 
@@ -337,18 +338,9 @@
                 ui.slotsContainer.appendChild(slotDiv);
             });
         }
-        
-        function renderSelectedDentistAgenda() {
-            if (!selectedDentist) return;
-            ui.loadingDiv.style.display = 'block';
-            ui.slotsContainer.innerHTML = '';
-            const appointments = allAppointments[selectedDentist];
-            renderSlots(appointments);
-            renderAdminPanels(appointments);
-        }
-        
+                
         function renderAdminPanels(appointments = []) {
-            if (!selectedDentist || !auth.currentUser) {
+            if (!auth.currentUser || !selectedDentist) {
                 const msg = '<p class="text-gray-600 p-3 text-center">Selecione uma agenda para visualizar.</p>';
                 ui.pendingAppointmentsDiv.innerHTML = msg;
                 ui.confirmedAppointmentsDiv.innerHTML = msg;
@@ -430,8 +422,25 @@
             else if (offset < 0 && (dayOfWeek === 0 || dayOfWeek === 6)) changeDay(-1);
             else {
                 updateDateDisplay();
-                renderSelectedDentistAgenda();
+                listenAndRenderAgenda();
             }
+        }
+
+        function listenAndRenderAgenda() {
+            if (!selectedDentist) return;
+            if (currentListenerUnsubscribe) currentListenerUnsubscribe();
+            
+            ui.loadingDiv.style.display = 'block';
+            ui.slotsContainer.innerHTML = '';
+
+            const q = query(collection(db, `appointments_${selectedDentist}`));
+            currentListenerUnsubscribe = onSnapshot(q, (snapshot) => {
+                const appointments = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderSlots(appointments);
+                if (auth.currentUser) {
+                    renderAdminPanels(appointments);
+                }
+            });
         }
         
         function openBookingModal(date, time) {
