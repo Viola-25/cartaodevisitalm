@@ -21,10 +21,24 @@
         .modal-backdrop, .login-backdrop {
             transition: opacity 0.3s ease;
         }
+        .dentist-btn {
+            position: relative;
+        }
         .dentist-btn.selected {
             background-color: #2563eb; /* bg-blue-600 */
             color: white;
             box-shadow: 0 4px 14px 0 rgb(0 118 255 / 39%);
+        }
+        .notification-dot {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 12px;
+            height: 12px;
+            background-color: #ef4444; /* bg-red-500 */
+            border-radius: 9999px;
+            border: 2px solid white;
+            display: none; /* Hidden by default */
         }
         #admin-view, #logout-button, #agenda-section {
             display: none;
@@ -99,9 +113,11 @@
                  <div class="flex justify-center gap-4 mb-8">
                     <button id="select-marcelo" data-dentist="marcelo" class="dentist-btn text-lg font-semibold py-3 px-6 bg-white border-2 border-blue-500 text-blue-500 rounded-lg transition-all duration-300">
                         Agenda Dr. Marcelo
+                        <span class="notification-dot"></span>
                     </button>
                     <button id="select-luciana" data-dentist="luciana" class="dentist-btn text-lg font-semibold py-3 px-6 bg-white border-2 border-pink-500 text-pink-500 rounded-lg transition-all duration-300">
                         Agenda Dra. Luciana
+                        <span class="notification-dot"></span>
                     </button>
                  </div>
             </section>
@@ -215,17 +231,51 @@
 
         let currentDate = new Date();
         currentDate.setHours(0, 0, 0, 0);
-        let appointments = [];
-        let selectedSlot = null;
+        let allAppointments = { marcelo: [], luciana: [] };
         let selectedDentist = null;
         let appointmentToDeleteId = null;
-        let unsubscribe = null;
+        let unsubscribe = { marcelo: null, luciana: null, current: null };
 
+        function setupAdminListeners() {
+            const dentists = ['marcelo', 'luciana'];
+            dentists.forEach(dentist => {
+                const q = query(collection(db, `appointments_${dentist}`));
+                unsubscribe[dentist] = onSnapshot(q, (snapshot) => {
+                    allAppointments[dentist] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    updateNotificationDots();
+                    if (selectedDentist === dentist) {
+                        renderSelectedDentistAgenda();
+                    }
+                });
+            });
+        }
+
+        function teardownAdminListeners() {
+            if (unsubscribe.marcelo) unsubscribe.marcelo();
+            if (unsubscribe.luciana) unsubscribe.luciana();
+            updateNotificationDots(true); // Clear dots
+        }
+
+        function updateNotificationDots(clear = false) {
+             const dentists = ['marcelo', 'luciana'];
+             dentists.forEach(dentist => {
+                const button = document.getElementById(`select-${dentist}`);
+                const dot = button.querySelector('.notification-dot');
+                const hasPending = !clear && allAppointments[dentist].some(a => a.status === 'pending');
+                dot.style.display = hasPending ? 'block' : 'none';
+             });
+        }
+        
         onAuthStateChanged(auth, (user) => {
             const isLoggedIn = !!user;
             ui.adminView.style.display = isLoggedIn ? 'block' : 'none';
             ui.logoutButton.style.display = isLoggedIn ? 'block' : 'none';
-            if (isLoggedIn) ui.loginModal.classList.add('hidden');
+            if (isLoggedIn) {
+                ui.loginModal.classList.add('hidden');
+                setupAdminListeners();
+            } else {
+                teardownAdminListeners();
+            }
             renderAdminPanels();
         });
 
@@ -249,6 +299,7 @@
                 ui.dentistButtons.forEach(btn => btn.classList.remove('selected'));
                 button.classList.add('selected');
                 updateDateDisplay();
+                listenToCurrentAppointments();
             });
         });
 
@@ -263,7 +314,7 @@
             return slots;
         }
         
-        function renderSlots() {
+        function renderSlots(appointments) {
             ui.loadingDiv.style.display = 'none';
             ui.slotsContainer.innerHTML = '';
             const dayOfWeek = currentDate.getDay();
@@ -287,28 +338,57 @@
             });
         }
         
-        function renderAdminPanels() {
+        function renderSelectedDentistAgenda() {
+            if (!selectedDentist) return;
+            const appointments = allAppointments[selectedDentist];
+            renderSlots(appointments);
+            renderAdminPanels(appointments);
+        }
+        
+        function renderAdminPanels(appointments = []) {
             if (!selectedDentist || !auth.currentUser) {
                 const msg = '<p class="text-gray-600 p-3 text-center">Selecione uma agenda para visualizar.</p>';
                 ui.pendingAppointmentsDiv.innerHTML = msg;
                 ui.confirmedAppointmentsDiv.innerHTML = msg;
                 return;
             }
-            renderPendingAppointments();
-            renderConfirmedAppointments();
-            addAdminButtonListeners();
+            renderPendingAppointments(appointments);
+            renderConfirmedAppointments(appointments);
         }
 
-        function renderPendingAppointments() {
+        function renderPendingAppointments(appointments) {
             const pending = appointments.filter(a => a.status === 'pending').sort((a,b) => new Date(a.createdAt) - new Date(b.createdAt));
             ui.pendingAppointmentsDiv.innerHTML = (pending.length === 0) ? '<p class="text-gray-600 p-3 text-center">Nenhuma solicitação pendente.</p>' : '';
             pending.forEach(appt => ui.pendingAppointmentsDiv.appendChild(createAdminCard(appt, true)));
+            addAdminButtonListeners();
         }
 
-        function renderConfirmedAppointments() {
+        function renderConfirmedAppointments(appointments) {
             const confirmed = appointments.filter(a => a.status === 'confirmed').sort((a, b) => new Date(`${a.date}T${a.time}`) - new Date(`${b.date}T${b.time}`));
-            ui.confirmedAppointmentsDiv.innerHTML = (confirmed.length === 0) ? '<p class="text-gray-600 p-3 text-center">Nenhuma consulta na agenda.</p>' : '';
-            confirmed.forEach(appt => ui.confirmedAppointmentsDiv.appendChild(createAdminCard(appt, false)));
+            ui.confirmedAppointmentsDiv.innerHTML = '';
+
+            if (confirmed.length === 0) {
+                ui.confirmedAppointmentsDiv.innerHTML = '<p class="text-gray-600 p-3 text-center">Nenhuma consulta na agenda.</p>';
+                return;
+            }
+            
+            const groupedByDate = confirmed.reduce((acc, appt) => {
+                (acc[appt.date] = acc[appt.date] || []).push(appt);
+                return acc;
+            }, {});
+
+            Object.keys(groupedByDate).sort().forEach(dateStr => {
+                const dateHeader = document.createElement('h5');
+                const dateObj = new Date(dateStr + 'T00:00:00');
+                dateHeader.className = 'font-bold text-lg text-blue-700 mt-6 mb-2 p-2 bg-blue-100 rounded-lg';
+                dateHeader.textContent = dateObj.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' });
+                ui.confirmedAppointmentsDiv.appendChild(dateHeader);
+
+                groupedByDate[dateStr].forEach(appt => {
+                    ui.confirmedAppointmentsDiv.appendChild(createAdminCard(appt, false));
+                });
+            });
+            addAdminButtonListeners();
         }
         
         function createAdminCard(appt, isPending) {
@@ -318,7 +398,7 @@
             const whatsappLink = contactNumber ? `https://wa.me/55${contactNumber}` : '#';
             const card = document.createElement('div');
             card.className = 'bg-white p-4 rounded-lg shadow mb-3 flex justify-between items-center';
-            let content = `<div><p class="font-bold text-lg ${isPending ? 'text-gray-800' : 'text-green-700'}">${isPending ? appt.patientName : `${formattedDate} - ${appt.time}`}</p>${isPending ? `<p class="text-gray-700">Contato: ${appt.patientContact}</p><p class="text-gray-500">${formattedDate} às ${appt.time}</p>` : `<p class="text-gray-800">${appt.patientName}</p><p class="text-gray-600">Contato: ${appt.patientContact}</p>`}</div>`;
+            let content = `<div><p class="font-bold text-lg ${isPending ? 'text-gray-800' : 'text-green-700'}">${isPending ? appt.patientName : `${appt.time}`}</p>${isPending ? `<p class="text-gray-700">Contato: ${appt.patientContact}</p><p class="text-gray-500">${formattedDate} às ${appt.time}</p>` : `<p class="text-gray-800">${appt.patientName}</p><p class="text-gray-600">Contato: ${appt.patientContact}</p>`}</div>`;
             if (isPending) {
                 content += `<div class="flex flex-col gap-2"><button data-id="${appt.id}" class="confirm-btn bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">Confirmar</button><button data-id="${appt.id}" class="delete-btn bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">Recusar</button></div>`;
             } else {
@@ -339,7 +419,6 @@
             if (dayOfWeek === 0) currentDate.setDate(currentDate.getDate() + 1);
             else if (dayOfWeek === 6) currentDate.setDate(currentDate.getDate() + 2);
             ui.currentDateElem.textContent = formatDate(currentDate);
-            listenToAppointments();
         }
 
         function changeDay(offset) {
@@ -347,19 +426,21 @@
             let dayOfWeek = currentDate.getDay();
             if (offset > 0 && (dayOfWeek === 6 || dayOfWeek === 0)) changeDay(1);
             else if (offset < 0 && (dayOfWeek === 0 || dayOfWeek === 6)) changeDay(-1);
-            else updateDateDisplay();
+            else {
+                updateDateDisplay();
+                renderSelectedDentistAgenda();
+            }
         }
         
-        function listenToAppointments() {
+        function listenToCurrentAppointments() {
             if (!selectedDentist) return;
-            if (unsubscribe) unsubscribe();
+            if (unsubscribe.current) unsubscribe.current();
             ui.loadingDiv.style.display = 'block';
             ui.slotsContainer.innerHTML = '';
             const q = query(collection(db, `appointments_${selectedDentist}`));
-            unsubscribe = onSnapshot(q, (snapshot) => {
-                appointments = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderSlots();
-                renderAdminPanels();
+            unsubscribe.current = onSnapshot(q, (snapshot) => {
+                const appointments = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderSlots(appointments);
             });
         }
 
