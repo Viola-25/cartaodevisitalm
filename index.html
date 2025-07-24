@@ -231,21 +231,25 @@
 
         let currentDate = new Date();
         currentDate.setHours(0, 0, 0, 0);
-        let allAppointments = { marcelo: [], luciana: [] };
         let selectedDentist = null;
         let appointmentToDeleteId = null;
         let adminListeners = { marcelo: null, luciana: null };
-        let currentListenerUnsubscribe = null;
+        let currentAgendaUnsubscribe = null;
 
         function setupAdminListeners() {
             const dentists = ['marcelo', 'luciana'];
             dentists.forEach(dentist => {
+                if(adminListeners[dentist]) adminListeners[dentist](); // Unsubscribe from previous if exists
                 const q = query(collection(db, `appointments_${dentist}`));
                 adminListeners[dentist] = onSnapshot(q, (snapshot) => {
-                    allAppointments[dentist] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    updateNotificationDots();
+                    const appointments = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    const hasPending = appointments.some(a => a.status === 'pending');
+                    const button = document.getElementById(`select-${dentist}`);
+                    const dot = button.querySelector('.notification-dot');
+                    dot.style.display = hasPending ? 'block' : 'none';
+
                     if (selectedDentist === dentist) {
-                        renderAdminPanels(allAppointments[dentist]);
+                        renderAdminPanels(appointments);
                     }
                 });
             });
@@ -254,17 +258,7 @@
         function teardownAdminListeners() {
             if (adminListeners.marcelo) adminListeners.marcelo();
             if (adminListeners.luciana) adminListeners.luciana();
-            updateNotificationDots(true); // Clear dots
-        }
-
-        function updateNotificationDots(clear = false) {
-             const dentists = ['marcelo', 'luciana'];
-             dentists.forEach(dentist => {
-                const button = document.getElementById(`select-${dentist}`);
-                const dot = button.querySelector('.notification-dot');
-                const hasPending = !clear && allAppointments[dentist] && allAppointments[dentist].some(a => a.status === 'pending');
-                dot.style.display = hasPending ? 'block' : 'none';
-             });
+            document.querySelectorAll('.notification-dot').forEach(dot => dot.style.display = 'none');
         }
         
         onAuthStateChanged(auth, (user) => {
@@ -277,7 +271,9 @@
             } else {
                 teardownAdminListeners();
             }
-            renderAdminPanels();
+            if(selectedDentist) {
+                 listenAndRenderAgenda();
+            }
         });
 
         if (window.location.search.includes('login=true')) ui.loginModal.classList.remove('hidden');
@@ -428,13 +424,13 @@
 
         function listenAndRenderAgenda() {
             if (!selectedDentist) return;
-            if (currentListenerUnsubscribe) currentListenerUnsubscribe();
+            if (currentAgendaUnsubscribe) currentAgendaUnsubscribe();
             
             ui.loadingDiv.style.display = 'block';
             ui.slotsContainer.innerHTML = '';
 
             const q = query(collection(db, `appointments_${selectedDentist}`));
-            currentListenerUnsubscribe = onSnapshot(q, (snapshot) => {
+            currentAgendaUnsubscribe = onSnapshot(q, (snapshot) => {
                 const appointments = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 renderSlots(appointments);
                 if (auth.currentUser) {
