@@ -203,7 +203,6 @@
         const auth = getAuth(app);
 
         const workingHours = { start: 9, end: 18, lunchStart: 12, lunchEnd: 14 };
-        const slotDuration = 60;
 
         const ui = {
             agendaSection: document.getElementById('agenda-section'),
@@ -236,6 +235,24 @@
         let adminListeners = { marcelo: null, luciana: null };
         let currentAgendaUnsubscribe = null;
 
+        // --- AUTHENTICATION LOGIC ---
+        onAuthStateChanged(auth, (user) => {
+            const isLoggedIn = !!user;
+            ui.adminView.style.display = isLoggedIn ? 'block' : 'none';
+            ui.logoutButton.style.display = isLoggedIn ? 'block' : 'none';
+            
+            if (isLoggedIn) {
+                ui.loginModal.classList.add('hidden');
+                setupAdminListeners();
+            } else {
+                teardownAdminListeners();
+            }
+            // Re-render the agenda view if a dentist is selected, to show/hide admin panels correctly
+            if(selectedDentist) {
+                 listenAndRenderAgenda();
+            }
+        });
+
         function setupAdminListeners() {
             const dentists = ['marcelo', 'luciana'];
             dentists.forEach(dentist => {
@@ -260,23 +277,10 @@
             if (adminListeners.luciana) adminListeners.luciana();
             document.querySelectorAll('.notification-dot').forEach(dot => dot.style.display = 'none');
         }
-        
-        onAuthStateChanged(auth, (user) => {
-            const isLoggedIn = !!user;
-            ui.adminView.style.display = isLoggedIn ? 'block' : 'none';
-            ui.logoutButton.style.display = isLoggedIn ? 'block' : 'none';
-            if (isLoggedIn) {
-                ui.loginModal.classList.add('hidden');
-                setupAdminListeners();
-            } else {
-                teardownAdminListeners();
-            }
-            if(selectedDentist) {
-                 listenAndRenderAgenda();
-            }
-        });
 
+        // --- UI EVENT LISTENERS ---
         if (window.location.search.includes('login=true')) ui.loginModal.classList.remove('hidden');
+        
         ui.loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
@@ -287,6 +291,7 @@
                 ui.loginError.classList.remove('hidden');
             }
         });
+
         ui.logoutButton.addEventListener('click', () => signOut(auth));
 
         ui.dentistButtons.forEach(button => {
@@ -300,6 +305,7 @@
             });
         });
 
+        // --- DATE & AGENDA LOGIC ---
         function formatDate(date) { return date.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' }); }
         function getFormattedDateString(date) { return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`; }
         function generateTimeSlots() {
@@ -310,7 +316,43 @@
             }
             return slots;
         }
-        
+
+        function listenAndRenderAgenda() {
+            if (!selectedDentist) return;
+            if (currentAgendaUnsubscribe) currentAgendaUnsubscribe();
+            
+            ui.loadingDiv.style.display = 'block';
+            ui.slotsContainer.innerHTML = '';
+
+            const q = query(collection(db, `appointments_${selectedDentist}`));
+            currentAgendaUnsubscribe = onSnapshot(q, (snapshot) => {
+                const appointments = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderSlots(appointments);
+                if (auth.currentUser) {
+                    renderAdminPanels(appointments);
+                }
+            });
+        }
+
+        function updateDateDisplay() {
+            let dayOfWeek = currentDate.getDay();
+            if (dayOfWeek === 0) currentDate.setDate(currentDate.getDate() + 1);
+            else if (dayOfWeek === 6) currentDate.setDate(currentDate.getDate() + 2);
+            ui.currentDateElem.textContent = formatDate(currentDate);
+        }
+
+        function changeDay(offset) {
+            currentDate.setDate(currentDate.getDate() + offset);
+            let dayOfWeek = currentDate.getDay();
+            if (offset > 0 && (dayOfWeek === 6 || dayOfWeek === 0)) changeDay(1);
+            else if (offset < 0 && (dayOfWeek === 0 || dayOfWeek === 6)) changeDay(-1);
+            else {
+                updateDateDisplay();
+                listenAndRenderAgenda();
+            }
+        }
+
+        // --- RENDERING FUNCTIONS ---
         function renderSlots(appointments) {
             ui.loadingDiv.style.display = 'none';
             ui.slotsContainer.innerHTML = '';
@@ -404,74 +446,40 @@
             document.querySelectorAll('.delete-confirmed-btn').forEach(btn => { btn.onclick = (e) => openDeleteModal(e.currentTarget.dataset.id); });
         }
 
-        function updateDateDisplay() {
-            let dayOfWeek = currentDate.getDay();
-            if (dayOfWeek === 0) currentDate.setDate(currentDate.getDate() + 1);
-            else if (dayOfWeek === 6) currentDate.setDate(currentDate.getDate() + 2);
-            ui.currentDateElem.textContent = formatDate(currentDate);
-        }
-
-        function changeDay(offset) {
-            currentDate.setDate(currentDate.getDate() + offset);
-            let dayOfWeek = currentDate.getDay();
-            if (offset > 0 && (dayOfWeek === 6 || dayOfWeek === 0)) changeDay(1);
-            else if (offset < 0 && (dayOfWeek === 0 || dayOfWeek === 6)) changeDay(-1);
-            else {
-                updateDateDisplay();
-                listenAndRenderAgenda();
-            }
-        }
-
-        function listenAndRenderAgenda() {
-            if (!selectedDentist) return;
-            if (currentAgendaUnsubscribe) currentAgendaUnsubscribe();
-            
-            ui.loadingDiv.style.display = 'block';
-            ui.slotsContainer.innerHTML = '';
-
-            const q = query(collection(db, `appointments_${selectedDentist}`));
-            currentAgendaUnsubscribe = onSnapshot(q, (snapshot) => {
-                const appointments = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderSlots(appointments);
-                if (auth.currentUser) {
-                    renderAdminPanels(appointments);
-                }
-            });
-        }
-        
+        // --- MODAL & FORM LOGIC ---
         function openBookingModal(date, time) {
-            selectedSlot = { date, time };
+            let selectedSlot = { date, time };
             document.getElementById('modal-date').textContent = new Date(date + 'T00:00:00').toLocaleDateString('pt-BR', {day: '2-digit', month: 'long'});
             document.getElementById('modal-time').textContent = time;
             ui.bookingModal.classList.remove('hidden');
+
+            ui.bookingForm.onsubmit = async (e) => {
+                e.preventDefault();
+                const submitBtn = document.getElementById('submit-booking');
+                submitBtn.disabled = true;
+                try {
+                    await addDoc(collection(db, `appointments_${selectedDentist}`), {
+                        date: selectedSlot.date, time: selectedSlot.time,
+                        patientName: document.getElementById('patient-name').value,
+                        patientContact: document.getElementById('patient-contact').value,
+                        status: 'pending', createdAt: new Date()
+                    });
+                    closeBookingModal();
+                    ui.successMessage.classList.remove('hidden');
+                    setTimeout(() => { ui.successMessage.classList.add('hidden'); }, 3000);
+                } catch (error) { console.error("Erro ao agendar: ", error); } finally { submitBtn.disabled = false; }
+            };
         }
 
-        function closeBookingModal() { ui.bookingModal.classList.add('hidden'); ui.bookingForm.reset(); selectedSlot = null; }
+        function closeBookingModal() { ui.bookingModal.classList.add('hidden'); ui.bookingForm.reset(); ui.bookingForm.onsubmit = null; }
         function openDeleteModal(id) { appointmentToDeleteId = id; ui.deleteConfirmModal.classList.remove('hidden'); }
         function closeDeleteModal() { appointmentToDeleteId = null; ui.deleteConfirmModal.classList.add('hidden'); }
 
-        async function handleFormSubmit(e) {
-            e.preventDefault();
-            const submitBtn = document.getElementById('submit-booking');
-            submitBtn.disabled = true;
-            try {
-                await addDoc(collection(db, `appointments_${selectedDentist}`), {
-                    date: selectedSlot.date, time: selectedSlot.time,
-                    patientName: document.getElementById('patient-name').value,
-                    patientContact: document.getElementById('patient-contact').value,
-                    status: 'pending', createdAt: new Date()
-                });
-                closeBookingModal();
-                ui.successMessage.classList.remove('hidden');
-                setTimeout(() => { ui.successMessage.classList.add('hidden'); }, 3000);
-            } catch (error) { console.error("Erro ao agendar: ", error); } finally { submitBtn.disabled = false; }
-        }
-
+        // --- GLOBAL EVENT LISTENERS ---
         ui.prevDayBtn.addEventListener('click', () => changeDay(-1));
         ui.nextDayBtn.addEventListener('click', () => changeDay(1));
         ui.cancelBookingBtn.addEventListener('click', closeBookingModal);
         ui.bookingModal.addEventListener('click', (e) => { if (e.target === ui.bookingModal) closeBookingModal(); });
-        ui.bookingForm.addEventListener('submit', handleFormSubmit);
         ui.cancelDeleteBtn.addEventListener('click', closeDeleteModal);
         ui.deleteConfirmModal.addEventListener('click', (e) => { if (e.target === ui.deleteConfirmModal) closeDeleteModal(); });
         ui.confirmDeleteBtn.addEventListener('click', async () => {
