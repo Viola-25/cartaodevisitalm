@@ -234,7 +234,7 @@
         let allAppointments = { marcelo: [], luciana: [] };
         let selectedDentist = null;
         let appointmentToDeleteId = null;
-        let unsubscribe = { marcelo: null, luciana: null, current: null };
+        let unsubscribe = { marcelo: null, luciana: null };
 
         function setupAdminListeners() {
             const dentists = ['marcelo', 'luciana'];
@@ -299,7 +299,7 @@
                 ui.dentistButtons.forEach(btn => btn.classList.remove('selected'));
                 button.classList.add('selected');
                 updateDateDisplay();
-                listenToCurrentAppointments();
+                renderSelectedDentistAgenda(); // BUG FIX: Render everything on selection
             });
         });
 
@@ -340,6 +340,8 @@
         
         function renderSelectedDentistAgenda() {
             if (!selectedDentist) return;
+            ui.loadingDiv.style.display = 'block';
+            ui.slotsContainer.innerHTML = '';
             const appointments = allAppointments[selectedDentist];
             renderSlots(appointments);
             renderAdminPanels(appointments);
@@ -384,7 +386,7 @@
                 dateHeader.textContent = dateObj.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' });
                 ui.confirmedAppointmentsDiv.appendChild(dateHeader);
 
-                groupedByDate[dateStr].forEach(appt => {
+                groupedByDate[dateStr].sort((a,b) => a.time.localeCompare(b.time)).forEach(appt => {
                     ui.confirmedAppointmentsDiv.appendChild(createAdminCard(appt, false));
                 });
             });
@@ -432,18 +434,6 @@
             }
         }
         
-        function listenToCurrentAppointments() {
-            if (!selectedDentist) return;
-            if (unsubscribe.current) unsubscribe.current();
-            ui.loadingDiv.style.display = 'block';
-            ui.slotsContainer.innerHTML = '';
-            const q = query(collection(db, `appointments_${selectedDentist}`));
-            unsubscribe.current = onSnapshot(q, (snapshot) => {
-                const appointments = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderSlots(appointments);
-            });
-        }
-
         function openBookingModal(date, time) {
             selectedSlot = { date, time };
             document.getElementById('modal-date').textContent = new Date(date + 'T00:00:00').toLocaleDateString('pt-BR', {day: '2-digit', month: 'long'});
